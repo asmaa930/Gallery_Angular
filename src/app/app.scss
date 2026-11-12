@@ -1,0 +1,315 @@
+
+@use "./../abstracts/" as *;
+
+//? _______________________________________________________
+
+//* placeholder
+%minVh {
+    // fallback
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+
+
+/* ____________________________________ Gallery ____________________________________ */
+
+#Gallery {
+    @extend %minVh;
+
+    .container {
+        @extend %minVh;
+        @include flex();
+
+        .content {
+            display: flex;
+
+            @include respond(350) {
+                flex-direction: column;
+            }
+
+            @include respond(1050) {
+                flex-direction: row;
+            }
+
+            .box {
+                flex: 1;
+                transition-duration: 0.5s;
+
+                .item {
+                    height: 500px;
+                    border: 3px solid rgb(255, 255, 255);
+                    border-radius: 100px;
+                    overflow: hidden;
+                    cursor: pointer;
+                    position: relative;
+                    transition-duration: 0.8s;
+
+                    @include respond(350) {
+                        height: 100px;
+                        max-width: 500px;
+                        margin: auto;
+                    }
+
+                    @include respond(1050) {
+                        height: 500px;
+                        max-width: initial;
+                        margin: initial;
+                    }
+
+                    .image {
+                        height: 100%;
+
+                        img {
+                            height: 100%;
+                            width: 100%;
+                            object-fit: cover;
+                        }
+                    }
+
+                    .layout {
+                        @include position($t: 0, $l: 0);
+                        @include distance(100%, 100%);
+                        @include flex($ai: end);
+
+                        background: rgba(0, 0, 0, 0.5);
+                        backdrop-filter: blur(3px);
+                        transition-duration: 0.8s;
+
+                        .open-key {
+                            @include distance(50px, 50px);
+                            @include flex();
+                            @include position($t: 50%, $l: 50%);
+                            transform: translate(-50%, -50%);
+                            transition: 0.6s;
+
+                            cursor: pointer;
+                            font-size: 18px;
+
+                            background: rgba(0, 0, 0, 0.3);
+                            box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.8),
+                                4px 4px 5px rgba(0, 0, 0, 0.5);
+
+                            backdrop-filter: blur(20px);
+                            border: 2px solid #fff;
+                            color: #fff;
+
+                            @include respond(1050) {
+                                @include distance(40px, 40px);
+                                font-size: 16px;
+                            }
+
+                            @include respond(1250) {
+                                @include distance(50px, 50px);
+                                font-size: 18px;
+                            }
+                        }
+
+                        .description {
+                            border-radius: 25px;
+                            background: linear-gradient(to top,
+                                    rgba(0, 0, 0, 0.3),
+                                    rgba(0, 0, 0, 0.1));
+                            backdrop-filter: blur(20px);
+                            color: #fff;
+
+                            opacity: 0;
+                            transform: translateY(100%);
+                        }
+                    }
+                }
+
+                // ****************************************
+                &.active {
+                    flex: 5;
+
+                    .item {
+                        border-radius: 30px;
+
+                        @include respond(350) {
+                            height: 450px;
+                        }
+
+                        @include respond(1050) {
+                            height: 500px;
+                        }
+
+                        .layout {
+                            background: transparent;
+                            backdrop-filter: initial;
+
+                            .open-key {
+                                @include position($t: 0%, $l: 100%);
+                                transform: translate(-130%, 30%);
+                            }
+
+                            .description {
+                                opacity: 1;
+                                transform: translateY(0%);
+                                transition: 0.5s 0.5s;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+
+/*! ____________________________________ PopUp ____________________________________ */
+.popup {
+
+    @include position(fixed, $t: 0%, $l: 0%);
+    @include distance(100%, 100%);
+
+    background: rgb(0, 0, 0, 0.5);
+    backdrop-filter: blur(20px);
+
+    opacity: 0;
+
+    display: none;
+    transition-duration: 0.5s;
+
+
+    &.active {
+        display: flex;
+    }
+
+    &.show {
+        opacity: 1;
+
+        .container {
+            .box {
+                transform: rotate(360deg) scale(1);
+                opacity: 1;
+            }
+        }
+
+    }
+
+    .container {
+        @include flex();
+
+        .box {
+            max-width: 550px;
+            border-radius: 30px;
+            overflow: hidden;
+            position: relative;
+            border: 3px solid rgb(255, 255, 255);
+
+            transform: rotate(0deg) scale(0);
+            opacity: 0;
+            transition-duration: 0.5s;
+
+            @include respond(350) {
+                max-width: 400px;
+            }
+
+            @include respond(650) {
+                max-width: 450px;
+            }
+
+            @include respond(1050) {
+                max-width: 500px;
+            }
+
+            .image {
+                img {
+                    transition-duration: 0.5s;
+                }
+            }
+
+            .icons {
+                @include position(absolute, $t: 0%, $l: 0%);
+                @include distance(100%, 100%);
+
+                i,
+                ul li {
+                    background: rgb(0, 0, 0, 0.4);
+                    backdrop-filter: blur(10px);
+
+                    color: #fff;
+                    border-radius: 50%;
+                    border: 2px solid #fff;
+
+                    cursor: pointer;
+                    font-size: 18px;
+
+                    @include distance(40px, 40px);
+                    @include flex();
+
+                    @include respond(350) {
+                        @include distance(30px, 30px);
+                        font-size: 16px;
+                    }
+
+                    @include respond(650) {
+                        @include distance(35px, 35px);
+                    }
+
+                    @include respond(1050) {
+                        @include distance(40px, 40px);
+                        font-size: 18px;
+                    }
+                }
+
+                .close {
+                    @include position(absolute, $t: 20px, $r: 20px);
+                }
+
+                .prev,
+                .next {
+                    @include position(absolute, $t: 50%);
+                    transform: translateY(-50%);
+                }
+
+                .prev {
+                    left: 20px;
+                }
+
+                .next {
+                    right: 20px;
+                }
+
+                .wrapper_indicators {
+                    @include position(absolute, $b: 20px, $l: 50%);
+                    transform: translateX(-50%);
+                    width: calc(100% - 40px);
+                    /* width: 90%; */
+                    overflow-x: scroll;
+
+                    &::-webkit-scrollbar {
+                        height: 5px;
+                    }
+
+                    &::-webkit-scrollbar-thumb {
+                        background-color: #000;
+                        border-radius: 5px;
+                    }
+
+                    &::-webkit-scrollbar-track {
+                        background-color: #4f4f4f;
+                        border-radius: 5px;
+                    }
+
+                    .indicators {
+                        @include flex();
+                        width: max-content;
+                        font-weight: 700;
+                    }
+
+                    .indicators {
+                        li.active {
+                            background: #fff;
+                            border: 2px solid var(--bs-warning);
+                            color: var(--bs-warning);
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+}
+

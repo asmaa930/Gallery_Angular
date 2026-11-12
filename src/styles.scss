@@ -1,1 +1,29 @@
 /* You can add global styles to this file, and also import other style files */
+
+
+//* Importing Bootstrap file.
+// @use 'bootstrap/scss/bootstrap';
+
+@use 'bootstrap/dist/css/bootstrap.min.css';
+
+//* Importing fontawesome file.
+@use "@fortawesome/fontawesome-free/css/all.min.css";
+
+
+::-webkit-scrollbar {
+    width: 10px
+}
+
+::-webkit-scrollbar-track {
+    background: #202228;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #fff;
+    border-radius: 10px;
+}
+
+body {
+    background: radial-gradient(ellipse at top, #20242b 0%, #14161a 70%);
+    overflow-x: hidden;
+}
