@@ -6,11 +6,10 @@
         <div class="w-100 d-flex flex-column row-gap-3 row-gap-lg-5">
             <div class="content gap-3">
 
-                <ng-container *ngFor="let product of products.slice(0,halfLengthProducts); index as i; first as f">
-                    <div class="box {{(currentBox==box|| (!isProductHovered && f))?'active':'' }}" #box
-                        (mouseenter)="updateBoxHovered(box)">
-                        <div class="item">
-
+                <ng-container
+                    *ngFor="let product of products.slice(0,halfLengthProducts); index as i; first as firstProduct">
+                    <div class="box {{(currentBox==box|| (!isProductHovered && firstProduct))?'active':'' }}" #box>
+                        <div class="item" (mouseenter)="updateBoxHovered(box)">
                             <div class="image">
                                 <img src="assets/images/{{product?.img}}" [attr.data-index]="i" #currentImg
                                     class="img-fluid" alt="{{product.title}}">
@@ -34,8 +33,8 @@
             <div class="content gap-3">
 
                 <ng-container *ngFor="let product of products.slice(halfLengthProducts); index as i">
-                    <div class="box {{currentBox==box?'active':''}}" #box (mouseenter)="updateBoxHovered(box)">
-                        <div class="item">
+                    <div class="box {{currentBox==box?'active':''}}" #box>
+                        <div class="item" (mouseenter)="updateBoxHovered(box)">
                             <div class="image">
                                 <img src="assets/images/{{product?.img}}" [attr.data-index]="i+halfLengthProducts"
                                     #currentImg class="img-fluid" alt="{{product.title}}">
@@ -66,7 +65,7 @@
 
 <div class="popup" #popup (click)="closePopup()">
     <div class="container">
-        <div class="box" (click)="stopProp($event)">
+        <div class="box {{isSameImageEffect()?'same_image_effect':''}}  {{isInvalidKeyEffect()?'invalid_key_effect':'' }}" (click)="stopProp($event)">
             <div class="image">
                 <img src="assets/images/1.jpg" #popupImg class="img-fluid">
             </div>
@@ -79,7 +78,8 @@
                 <div class="wrapper_indicators">
                     <ul class="indicators list-unstyled column-gap-2 column-gap-lg-3">
                         <ng-container *ngFor="let product of products;index as i">
-                            <li class="{{currentImgIndex == i?'active':''}}" [attr.data-index]="i" (click)="paginateImg(i)">
+                            <li class="{{currentImgIndex() == i?'active':''}}" [attr.data-index]="i"
+                                (click)="paginateImg(i)" #indicator>
                                 {{i+1}} </li>
                         </ng-container>
                     </ul>

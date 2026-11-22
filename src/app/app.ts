@@ -1,16 +1,19 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, computed, effect, ElementRef, Signal, signal, viewChildren, WritableSignal } from '@angular/core';
 
 @Component({
     imports: [CommonModule],
     selector: 'app-root',
     styleUrl: './app.scss',
     templateUrl: './app.html',
+    host: {
+        "(document:keyup)": "checkKey($event)"
+    }
 })
 
 export class App {
 
-    //* ________________________ Properties ________________________
+    //! ________________________ Properties ________________________
 
     public products = [
         { img: "1.jpg", title: "Candle Set", description: "Set of four soft toned candles on a stone platform with dried grass, lit by gentle and warm natural light." },
@@ -32,7 +35,7 @@ export class App {
     ];
 
     public isProductHovered: boolean = false;
-    public currentImgIndex: number = 0;
+    public currentImgIndex = signal(0);
     public halfLengthProducts: number = Math.floor(this.products.length / 2);
 
     // (!) non null assertion
@@ -41,7 +44,19 @@ export class App {
 
     public currentBox!: HTMLElement;
 
-    //* ________________________ Methods ________________________
+    public indicators = viewChildren<ElementRef<HTMLLIElement>>('indicator');
+    public activeIndicator = computed(() => this.indicators()[this.currentImgIndex()]);
+
+
+    private numKey: string = '';
+    private lastTimeOut: number = 0;
+    // private lastTimeOut: ReturnType<typeof setTimeout> | undefined;
+
+    public isSameImageEffect: WritableSignal<boolean> = signal(false);
+    public isInvalidKeyEffect: WritableSignal<boolean> = signal(false);
+
+
+    //! ________________________ Methods ________________________
 
     public updateBoxHovered(box: HTMLElement) {
         this.isProductHovered = true;
@@ -53,7 +68,7 @@ export class App {
     public openPopup(popupEle: HTMLElement, popupImg: HTMLImageElement, currentImg: HTMLImageElement) {
         this.popupEle = popupEle;
         this.popupImg = popupImg;
-        this.currentImgIndex = Number(currentImg.getAttribute('data-index'));
+        this.currentImgIndex.set(Number(currentImg.getAttribute('data-index')));
 
         this.popupEle.classList.add('active');
         setTimeout(() => {
@@ -61,7 +76,6 @@ export class App {
         }, 1);
 
         this.updateImgSrc(currentImg.src);
-
     }
 
     //* ________________________
@@ -86,19 +100,15 @@ export class App {
     public updateImgSrc(currentImgSrc: string) {
         this.popupImg.src = currentImgSrc;
 
-        let currentIndex = this.products.findIndex(function (product) {
-            return currentImgSrc.includes(`assets/images/${product.img}`);
-        });
-
-        setTimeout(function () {
-            document.querySelector(`.indicators li[data-index="${currentIndex}"]`)?.scrollIntoView();
+        setTimeout(() => {
+            this.activeIndicator().nativeElement.scrollIntoView();
         }, 100);
     }
 
     //* ________________________
 
     public updateImg() {
-        let newImg = (this.products[this.currentImgIndex])?.img,
+        let newImg = (this.products[this.currentImgIndex()])?.img,
             newImgSrc = `assets/images/${newImg}`;
 
         this.updateImgSrc(newImgSrc);
@@ -109,21 +119,124 @@ export class App {
     public targetImg(direct: string) {
 
         if (direct == 'next') {
-            this.currentImgIndex = ++this.currentImgIndex % this.products.length;
+            this.currentImgIndex.update((val) => ++val % this.products.length);
 
         } else if (direct == 'prev') {
-            this.currentImgIndex = (--this.currentImgIndex + this.products.length) % this.products.length;
+            this.currentImgIndex.update((val) => (--val + this.products.length) % this.products.length);
         }
 
         this.updateImg();
     }
-    
+
     //* ________________________
 
     public paginateImg(index: number) {
 
-        this.currentImgIndex = index;
+        this.currentImgIndex.set(index);
         this.updateImg();
     }
 
+    //* ________________________
+
+    triggerSameImageEffect() {
+
+        this.isSameImageEffect.set(true);
+
+        setTimeout(() => {
+            this.isSameImageEffect.set(false);
+        }, 400);
+    }
+
+    //* ________________________
+
+    triggerInvalidKeyEffect() {
+
+        this.isInvalidKeyEffect.set(true);
+
+        setTimeout(() => {
+            this.isInvalidKeyEffect.set(false);
+        }, 400);
+    }
+    //* ________________________
+
+    fireKey() {
+
+        // Special Effect for Current Image Key
+
+        let key: number = Number(this.numKey);
+
+        if (key == (this.currentImgIndex() + 1)) {
+            this.triggerSameImageEffect();
+        }
+
+        // Image Change with Keyboard Numbers
+
+        else if (key >= 1 && key <= this.products.length) {
+            this.paginateImg(Number(this.numKey) - 1);
+        }
+
+        // Special Effect for Invalid Keys
+
+        else if (key < 1 || key > this.products.length) {
+            this.triggerInvalidKeyEffect();
+        }
+    }
+
+    //* ________________________
+
+    checkKey(event: KeyboardEvent) {
+
+        if (this.popupEle?.classList.contains('show')) {
+
+            //* __________________ ArrowRight __________________
+
+            if (event.key == "ArrowRight") {
+                this.targetImg('next');
+            }
+
+            //* __________________ ArrowLeft __________________
+
+            else if (event.key == "ArrowLeft") {
+                this.targetImg('prev');
+            }
+
+            //* __________________ Escape __________________
+
+            else if (event.key == "Escape") {
+                this.closePopup();
+            }
+
+            //* __________________ Keyboard Numbers __________________
+
+            else if (Number.isInteger(+event.key)) {
+
+                this.numKey += event.key;
+
+
+                clearTimeout(this.lastTimeOut);
+                this.lastTimeOut = setTimeout(() => {
+                    this.fireKey();
+                    this.numKey = '';
+                }, 400);
+
+            }
+
+            //* OR --------------------------
+
+            // else if (Number.isInteger(+event.key) || event.key == "Enter") {
+
+            //     this.numKey += event.key;
+            //     this.numKey = '' + parseInt(this.numKey);  // "12Enter" >> 12
+
+            //     if (event.key == "Enter") {
+            //         this.fireKey();
+            //         this.numKey = '';
+            //     }
+            // }
+
+        }
+
+
+    }
 }
+
